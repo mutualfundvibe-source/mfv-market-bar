@@ -1,0 +1,8 @@
+{
+  "name": "mfv-market-bar",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update": "node scripts/update.mjs"
+  }
+}
