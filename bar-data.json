@@ -1,0 +1,17 @@
+{
+  "asOf": "2025-08-29T09:00:00+05:30",
+  "indices": {
+    "nifty50":  { "value": 0, "change": 0 },
+    "sensex":   { "value": 0, "change": 0 },
+    "largecap": { "value": 0, "change": 0 },
+    "midcap":   { "value": 0, "change": 0 },
+    "smallcap": { "value": 0, "change": 0 },
+    "usdInr":   { "value": 0, "change": 0 }
+  },
+  "cta": {
+    "text": "Connect with MutualFundVibe expert for your First SIP",
+    "url": "https://wa.me/91XXXXXXXXXX?text=I%20want%20to%20start%20my%20first%20SIP&utm_source=mfv_bar&utm_medium=site&utm_campaign=cta_v1"
+  },
+  "branding": "MutualFundVibe",
+  "source": "Yahoo Finance (delayed); Index definitions by NSE"
+}
