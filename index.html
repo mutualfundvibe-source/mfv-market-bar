@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MutualFundVibe – Market Snapshot Bar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b1220; --chip:#121a2b; --text:#e7ecf4; --muted:#a9b4c7;
+      --good:#1db954; --bad:#ff4d4d; --accent:#3b82f6; --border:#22304b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:transparent;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+    .mfvbar{
+      width:100%; color:var(--text); background:var(--bg); border-bottom:1px solid var(--border);
+      display:flex; flex-direction:column; gap:6px; padding:8px 12px;
+    }
+    .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .chips{display:flex; gap:8px; flex-wrap:wrap; flex:1}
+    .chip{
+      background:var(--chip); border:1px solid var(--border); border-radius:999px; padding:6px 10px;
+      display:flex; gap:8px; align-items:baseline; min-height:32px;
+    }
+    .name{font-weight:600; letter-spacing:.1px}
+    .val{font-variant-numeric:tabular-nums}
+    .chg{font-variant-numeric:tabular-nums; font-weight:600}
+    .chg.up{color:var(--good)} .chg.down{color:var(--bad)}
+    .meta{font-size:12px; color:var(--muted)}
+    .spacer{flex:1}
+    .brand{font-weight:700}
+    .cta{
+      border-radius:999px; border:1px solid var(--accent); padding:6px 12px; text-decoration:none;
+      color:var(--text); background:transparent; transition:all .15s ease-in-out; white-space:nowrap;
+    }
+    .cta:hover{background:var(--accent); color:white}
+    @media (max-width:600px){
+      .mfvbar{gap:8px}
+      .row.bottom{flex-direction:column; align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="mfvbar" role="region" aria-label="Market snapshot">
+    <div class="row top">
+      <div id="chips" class="chips" aria-live="polite" aria-busy="true"></div>
+    </div>
+    <div class="row bottom">
+      <div class="meta">
+        <span class="brand">MutualFundVibe</span>
+        <span>· For education only · Sources: Yahoo Finance (delayed), NSE definitions</span>
+        <span id="asof"></span>
+      </div>
+      <div class="spacer"></div>
+      <a id="cta" class="cta" href="#" target="_blank" rel="noopener">Connect with MutualFundVibe expert for your First SIP</a>
+    </div>
+  </div>
+
+  <script>
+    const DATA_URL = "YOUR_GH_PAGES_JSON_URL"; // e.g., https://<username>.github.io/<repo>/bar-data.json
+
+    const labelMap = {
+      nifty50: "NIFTY 50",
+      sensex: "SENSEX",
+      largecap: "Large Cap",
+      midcap: "Mid Cap",
+      smallcap: "Small Cap",
+      usdInr: "USD/INR",
+    };
+
+    function chipTemplate({key, value, change}){
+      const dir = (change ?? 0) >= 0 ? "up" : "down";
+      const arrow = dir === "up" ? "▲" : "▼";
+      const pct = (change ?? 0).toFixed(2);
+      const displayVal = (key === 'usdInr') ? value.toFixed(2) : Intl.NumberFormat('en-IN').format(Math.round(value));
+      return `
+        <div class="chip" title="${labelMap[key]} ${pct}%">
+          <span class="name">${labelMap[key]}</span>
+          <span class="val">${displayVal}</span>
+          <span class="chg ${dir}">${arrow} ${pct}%</span>
+        </div>
+      `;
+    }
+
+    async function loadData(){
+      const elChips = document.getElementById('chips');
+      const elAsOf = document.getElementById('asof');
+      const elCTA = document.getElementById('cta');
+      try{
+        const res = await fetch(DATA_URL, {cache:'no-store'});
+        if(!res.ok) throw new Error('Failed to fetch data JSON');
+        const data = await res.json();
+
+        const order = ["nifty50","sensex","largecap","midcap","smallcap","usdInr"];
+        elChips.innerHTML = order.map(k => chipTemplate({ key:k, ...data.indices[k] })).join("");
+        elChips.setAttribute('aria-busy','false');
+
+        const asOf = data.asOf ? `· Updated: ${new Date(data.asOf).toLocaleString('en-IN', { hour12:false, timeZone:'Asia/Kolkata' })} IST` : "";
+        elAsOf.textContent = ` ${asOf}`;
+
+        if(data.cta?.text) elCTA.textContent = data.cta.text;
+        if(data.cta?.url)  elCTA.href = data.cta.url;
+      }catch(err){
+        elChips.innerHTML = `<span class="meta">Unable to load market data right now.</span>`;
+        console.error(err);
+      }
+    }
+    loadData();
+  </script>
+</body>
+</html>
